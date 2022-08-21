@@ -246,6 +246,7 @@ class SocketHandler:
       with open('image.jpg', 'rb') as f:
         data = b64encode(f.read()).decode('ascii')
         dataType = 'image/jpeg'
+        
     else:
       with open('video.mp4', 'rb') as f:
         data = b64encode(f.read()).decode('ascii')
@@ -253,12 +254,25 @@ class SocketHandler:
 
     return data, dataType
 
-  def send_content(self, sock, id):
-    data, dataType = self.retrieve_content(id)
+  contentItems = {}
+  def send_content(self, sock, request):
+    if 'data' in request and request['data']:
+      id = request['id']
+      if id not in self.contentItems:
+        self.contentItems[id] = (request['data'], request['dataType'])
+      return
+
+    id = request['id']
+    if id in self.contentItems:
+      contents = self.contentItems[id]
+    else:
+      contents = self.retrieve_content(id)
+      self.contentItems[id] = contents
+    data, dataType = contents
     
     self.send_message(sock, {
       'sender' : 'server',
-      'id' : id,
+      'id' : request['id'],
       'type' : 'content',
       'data' : data,
       'dataType' : dataType,

@@ -30,12 +30,11 @@
 
 <script>
   sock = null
-  expectImage = false
-  expectVideo = false
 
   function addMessage(m) {
-    var d = messageBox.appendChild(document.createElement('div'))
-    d.appendChild(document.createTextNode(m))
+    var div = messageBox.appendChild(document.createElement('div'))
+    div.appendChild(document.createTextNode(m))
+    return div
   }
 
   function useLoginBox() {
@@ -69,6 +68,7 @@
   }
 
   function handleConnect() {
+    inputBox.parentElement.removeChild(inputBox)
     chatInput.focus()
   }
 
@@ -83,6 +83,18 @@
     addMessage(`[${response.sender}]: ${response.text}`)
   }
 
+  function handleContentMessage(response) {
+    var message = addMessage(`[${response.sender}]: Click to download`)
+    message.contentId = response.id
+    message.style.cursor = 'pointer'
+    message.onclick = e => {
+      sock.send(JSON.stringify({
+        type : 'content',
+        id : response.id,
+      }))
+    }
+  }
+
   function addExpandable(element, initialState) {
     element.expanded = false;
     setSize(element, element.expanded)
@@ -91,7 +103,6 @@
   }
 
   function blob64(data, dataType) {
-    console.log(data)
     var byteChars = atob(data)
     var byteNums = new Array(byteChars.length)
     for (var i = 0; i < byteChars.length; ++i) {
@@ -101,17 +112,29 @@
     return new Blob([bytes], { type: dataType })
   }
 
+  function handleContent(response) {
+    switch(response.dataType.split('/')[0]) {
+      case 'image': handleImage(response); break;
+      case 'video': handleVideo(response); break;
+    }
+  }
+
   function handleImage(response) {
-    var div = messageBox.appendChild(document.createElement('div'))
+    var div = document.createElement('div')
     
     var img = div.appendChild(document.createElement('img'))
     img.src = window.URL.createObjectURL(blob64(response.data, response.dataType))
-
     addExpandable(img, false)
+
+    for (var message of messageBox.children) {
+      if ('contentId' in message && message.contentId == response.id) {
+        messageBox.replaceChild(div, message);
+      }
+    }
   }
 
   function handleVideo(response) {
-    var div = messageBox.appendChild(document.createElement('div'))
+    var div = document.createElement('div')
 
     var video = div.appendChild(document.createElement('video'))
     video.setAttribute('controls', '')
@@ -120,16 +143,20 @@
     var source = video.appendChild(document.createElement('source'))
     source.src = window.URL.createObjectURL(blob64(response.data, response.dataType))
     source.type = response.dataType
+    
+    for (var message of messageBox.children) {
+      if ('contentId' in message && message.contentId == response.id) {
+        messageBox.replaceChild(div, message);
+      }
+    }
   }
 
   function handleResponse(response) {
-    console.log(response)
     var data = JSON.parse(response.data)
     switch (data.type) {
       case 'connect': handleConnect(data); break;
       case 'message': handleMessage(data); break;
-      case 'image'  : handleImage  (data); break;
-      case 'video'  : handleVideo  (data); break;
+      case 'content': handleContent(data); break;
     }
   }
 
@@ -140,6 +167,7 @@
     if (e.key == 'Enter') {
       sock.send(JSON.stringify({
         type : 'message',
+        dataType : 'text',
         text : chatInput.value,
       }))
 
@@ -147,12 +175,38 @@
     }
   }
 
+  chatInput.ondrop = e => {
+    e.preventDefault()
+    for (var item of e.dataTransfer.items) {
+      if (item.kind == 'file') { 
+        file = item.getAsFile()
+        id = Math.floor(Math.random() * 100000)
+        reader = new FileReader()
+        reader.onload = () => {
+          sock.send(JSON.stringify({
+            id : id,
+            type : 'message',
+            dataType : 'content'
+          }))
+
+          sock.send(JSON.stringify({
+            type : 'content',
+            id : id,
+            data : reader.result.split(',')[1],
+            dataType : file.type,
+          }))
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+  }
+
   useLoginBox()
 
   function setSize(element, expanded) {
     if (expanded) {
-      element.style.maxWidth = null
-      element.style.maxHeight = null
+      element.style.maxWidth = '100%'
+      element.style.maxHeight = '100%'
     } else {
       element.style.maxWidth = '20vw'
       element.style.maxHeight = '20vh'
