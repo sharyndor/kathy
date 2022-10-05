@@ -1,31 +1,136 @@
 <!DOCTYPE html>
 <html lang='en'>
-  <head>
-    <meta charset='utf-8'/>
-    <title>Kathy</title>
-    <style type='text/css'>
-      img {
-        width: auto;
-        height: auto;
-      }
-      img, #expand {
-        max-width: auto;
-        max-height: auto;
-      }
 
-      #chatBox {
-        position: absolute;
-        /* bottom: 0; */
-      }
-    </style>
-  </head>
-  <div id=inputBox>
+<head>
+  <meta charset='utf-8' />
+  <title>Kathy</title>
+  <style type='text/css'>
+    img {
+      width: auto;
+      height: auto;
+    }
+
+    img,
+    #expand {
+      max-width: auto;
+      max-height: auto;
+    }
+
+    html,
+    body {
+      background-color: #222222;
+      color: #aaaaaa;
+      height: 100%;
+      margin: 0
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #chatBox {
+      position: absolute;
+      /* bottom: 0; */
+    }
+
+    .bubble {
+      border: 1px solid #aaaaaa;
+      border-radius: 1em;
+      padding-left: 0.75em;
+      padding-right: 0.75em;
+      margin: 0.25em;
+    }
+
+    .box {
+      display: flex;
+    }
+
+    #top {
+      height: 1.5em;
+      font-size: 1.5em;
+      pointer-events: none;
+    }
+
+    #middle {
+      flex: 1
+    }
+
+    #bottom {
+      height: 1.5em;
+    }
+
+    #left {
+      width: 15%;
+    }
+
+    #right {
+      flex: 1;
+
+      display: flex;
+      justify-content: flex-end;
+      flex-direction: column;
+    }
+
+    ul {
+      margin: 0;
+      padding: 0em;
+
+      cursor: pointer;
+    }
+
+    li {
+      list-style: none;
+      margin-left: 1em;
+      cursor: pointer;
+    }
+
+    .boxfill {
+      flex: 1
+    }
+
+    .bottomup {
+      display: flex;
+      justify-content: flex-end;
+      flex-direction: column;
+    }
+  </style>
+</head>
+
+<body>
+  <div id=top class=bubble>
+    Welcome to Kathy!
+  </div>
+  <div id=middle class=box>
+    <div id=left class=bubble>
+      <ul><span>Text Channels</span>
+        <li>First Channel</li>
+        <li>Second Channel</li>
+      </ul>
+      <ul><span>Voice Channels</span>
+        <li>First Channel</li>
+        <li>Second Channel</li>
+      </ul>
+    </div>
+    <div id=right class="box">
+      <div class="bubble boxfill bottomup">
+        <div>First</div>
+        <div>Second</div>
+      </div>
+      <div id=bottom class=bubble>
+        Bottom
+      </div>
+    </div>
+  </div>
+</body>
+<!-- <div id=inputBox>
   </div>
   <div id=messageBox>
   </div>
   <div id=chatBox>
     <input id=chatInput>
-  </div>
+  </div> -->
+
 </html>
 
 <script>
@@ -38,7 +143,7 @@
   }
 
   function useLoginBox() {
-    while(inputBox.firstChild) {
+    while (inputBox.firstChild) {
       inputBox.removeChild(inputBox.firstChild)
     }
 
@@ -46,7 +151,7 @@
     serverDiv.appendChild(document.createElement('a')).text = 'Server:'
     var serverInput = serverDiv.appendChild(document.createElement('input'))
     serverInput.value = 'localhost:8080'
-    
+
     var loginDiv = inputBox.appendChild(document.createElement('div'))
     loginDiv.appendChild(document.createElement('a')).text = 'Login:'
     var loginInput = loginDiv.appendChild(document.createElement('input'))
@@ -59,8 +164,8 @@
         sock.onmessage = handleResponse
         sock.onopen = () => {
           sock.send(JSON.stringify({
-            type : 'connect',
-            sender : loginInput.value
+            type: 'connect',
+            sender: loginInput.value
           }))
         }
       }
@@ -73,8 +178,8 @@
   }
 
   function handleMessage(response) {
-    switch(response.dataType) {
-      case 'text':    handleTextMessage(response);    break;
+    switch (response.dataType) {
+      case 'text': handleTextMessage(response); break;
       case 'content': handleContentMessage(response); break;
     }
   }
@@ -89,8 +194,8 @@
     message.style.cursor = 'pointer'
     message.onclick = e => {
       sock.send(JSON.stringify({
-        type : 'content',
-        id : response.id,
+        type: 'content',
+        id: response.id,
       }))
     }
   }
@@ -113,7 +218,7 @@
   }
 
   function handleContent(response) {
-    switch(response.dataType.split('/')[0]) {
+    switch (response.dataType.split('/')[0]) {
       case 'image': handleImage(response); break;
       case 'video': handleVideo(response); break;
     }
@@ -121,7 +226,7 @@
 
   function handleImage(response) {
     var div = document.createElement('div')
-    
+
     var img = div.appendChild(document.createElement('img'))
     img.src = window.URL.createObjectURL(blob64(response.data, response.dataType))
     addExpandable(img, false)
@@ -143,7 +248,7 @@
     var source = video.appendChild(document.createElement('source'))
     source.src = window.URL.createObjectURL(blob64(response.data, response.dataType))
     source.type = response.dataType
-    
+
     for (var message of messageBox.children) {
       if ('contentId' in message && message.contentId == response.id) {
         messageBox.replaceChild(div, message);
@@ -166,9 +271,9 @@
   chatInput.onkeyup = e => {
     if (e.key == 'Enter') {
       sock.send(JSON.stringify({
-        type : 'message',
-        dataType : 'text',
-        text : chatInput.value,
+        type: 'message',
+        dataType: 'text',
+        text: chatInput.value,
       }))
 
       chatInput.value = ""
@@ -178,22 +283,22 @@
   chatInput.ondrop = e => {
     e.preventDefault()
     for (var item of e.dataTransfer.items) {
-      if (item.kind == 'file') { 
+      if (item.kind == 'file') {
         file = item.getAsFile()
         id = Math.floor(Math.random() * 100000)
         reader = new FileReader()
         reader.onload = () => {
           sock.send(JSON.stringify({
-            id : id,
-            type : 'message',
-            dataType : 'content'
+            id: id,
+            type: 'message',
+            dataType: 'content'
           }))
 
           sock.send(JSON.stringify({
-            type : 'content',
-            id : id,
-            data : reader.result.split(',')[1],
-            dataType : file.type,
+            type: 'content',
+            id: id,
+            data: reader.result.split(',')[1],
+            dataType: file.type,
           }))
         }
         reader.readAsDataURL(file)
