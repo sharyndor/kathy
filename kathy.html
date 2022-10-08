@@ -94,6 +94,42 @@
       justify-content: flex-end;
       flex-direction: column;
     }
+
+    #messages {
+      padding: 0;
+    }
+
+    .messagePane {
+      padding-left: 0.75em;
+      padding-right: 0.75em;
+      padding-top: 0.25em;
+      padding-bottom: 0.25em;
+
+      display: flex;
+    }
+
+    .messagePaneLeft {
+      width: 15%;
+      border-right: 2px solid;
+    }
+
+    .messagePaneRight {
+      flex: 1;
+      padding-left: 1em;
+    }
+
+    .messagePane:nth-last-child(even) {
+      background-color: #1e1e1e;
+    }
+
+    .messagePane:nth-last-child(odd) {
+      background-color: #222222;
+    }
+
+    .messagePane:last-child {
+      border-bottom-left-radius: 1em;
+      border-bottom-right-radius: 1em;
+    }
   </style>
 </head>
 
@@ -113,9 +149,23 @@
       </ul>
     </div>
     <div id=right class="box">
-      <div class="bubble boxfill bottomup">
-        <div>First</div>
-        <div>Second</div>
+      <div id=messages class="bubble boxfill bottomup">
+        <div class=messagePane>
+          <div class=messagePaneLeft>First Left</div>
+          <div class=messagePaneRight>First Right</div>
+        </div>
+        <div class=messagePane>
+          <div class=messagePaneLeft>Second Left</div>
+          <div class=messagePaneRight>Second Right</div>
+        </div>
+        <div class=messagePane>
+          <div class=messagePaneLeft>Third Left</div>
+          <div class=messagePaneRight>Third Right</div>
+        </div>
+        <div class=messagePane>
+          <div class=messagePaneLeft>Fourth Left</div>
+          <div class=messagePaneRight>Fourth Right</div>
+        </div>
       </div>
       <div id=bottom class=bubble>
         Bottom
