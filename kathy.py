@@ -5,6 +5,8 @@ import select
 import socket
 from threading import Lock, Thread
 
+import sqlite3
+
 from base64 import b64encode
 from hashlib import sha1
 
@@ -294,6 +296,25 @@ class SocketHandler:
       'dataType' : 'content',
     })
 
+class ContentServer:
+  def __init__(self):
+    self.connection = sqlite3.connect('Kathy.db')
+    self.cursor     = self.connection.cursor()
+
+  def get_user_id_by_key(self, key):
+    return self.cursor.execute('SELECT userid FROM users WHERE key=?', (key,)).fetchone()
+  
+  def post_content(self, userid, content):
+    self.cursor.execute('INSERT INTO messages (userid, content) VALUES (?, ?)', (userid, content))
+  
+  def get_content(self, msgid):
+    return self.cursor.execute('SELECT * FROM messages WHERE msgid=?', (msgid,))
+
+  def get_server_info(self):
+    return self.cursor.execute('SELECT (serverid, key) FROM servers').fetchall()
+
+  def get_server_identities(self, server):
+    return self.cursor.execute('SELECT identity FROM identities WHERE server=?', server).fetchall()
 
 if __name__ == '__main__':
   print('Hello world!')
