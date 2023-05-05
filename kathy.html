@@ -9,45 +9,16 @@
 </head>
 
 <body>
-  <div id=top class=bubble>
-    <div id="topMessage">
-      Welcome to Kathy!
-    </div>
-  </div>
-  <div id=middle class=box>
-    <div id=left class=bubble>
-      <ul><span>Text Channels</span>
-        <li>First Channel</li>
-        <li>Second Channel</li>
-      </ul>
-      <ul><span>Voice Channels</span>
-        <li>First Channel</li>
-        <li>Second Channel</li>
-      </ul>
-    </div>
-    <div id=right class="box">
-      <div id=messages class="bubble boxfill bottomup">
-        <div class=messagePane>
-          <div class=messagePaneLeft>First Left</div>
-          <div class=messagePaneRight>First Right</div>
-        </div>
-        <div class=messagePane>
-          <div class=messagePaneLeft>Second Left</div>
-          <div class=messagePaneRight>Second Right</div>
-        </div>
-        <div class=messagePane>
-          <div class=messagePaneLeft>Third Left</div>
-          <div class=messagePaneRight>Third Right</div>
-        </div>
-        <div class=messagePane>
-          <div class=messagePaneLeft>Fourth Left</div>
-          <div class=messagePaneRight>Fourth Right</div>
-        </div>
-      </div>
-      <div id=bottom class=bubble>
-        Bottom
+  <div class="vflex bubble">
+    <span class="bubble">Top</span>
+    <div class="hflex bubble">
+      <span class="bubble">Left</span>
+      <div class="vflex bubble">
+        <span class="bubble">Right</span>
+        <span class="bubble">Message</span>
       </div>
     </div>
+    <span class="bubble">Bottom</span>
   </div>
 </body>
 

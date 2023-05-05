@@ -13,7 +13,7 @@ from hashlib import sha1
 from http.client import HTTPSConnection
 import json
 
-from os import path, _exit
+import os
 
 from time import sleep, time
 
@@ -297,9 +297,19 @@ class SocketHandler:
     })
 
 class ContentServer:
-  def __init__(self):
-    self.connection = sqlite3.connect('Kathy.db')
+  def __init__(self, id):
+    self.connection = self.check_create_server_database(id)
     self.cursor     = self.connection.cursor()
+
+  def check_create_server_database(id):
+    server_name = 'server.db'
+    server_path = os.path.join(str(id), server_name)
+    
+    if not os.path.exists(server_path):
+      connection = sqlite3.connect(server_path)
+    else:
+      connection = sqlite3.connect(server_path)
+    return connection
 
   def get_user_id_by_key(self, key):
     return self.cursor.execute('SELECT userid FROM users WHERE key=?', (key,)).fetchone()
